@@ -6,6 +6,7 @@ Colección de proyectos React realizados en el curso de freeCodeCamp.
 - **contador-de-clics**: Contador de clics con React
 - **mi-app**: App básica de React
 - **testimonios-freecodecamp**: Componente de testimonios
+- **Tres en línea**: Juego clásico de tres en raya desarrollado con React.
 ## Cómo ejecutar
 1. Clona el repositorio
 2. Entra en la carpeta del proyecto que quieres ejecutar
