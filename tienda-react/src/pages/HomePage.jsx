@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import ProductCard from '../components/ProductCard';
-import SearchBar from '../components/SearchBar';
+import { useState, useEffect } from "react";
+import ProductCard from "../components/ProductCard";
+import SearchBar from "../components/SearchBar";
 
 function HomePage() {
   const [products, setProducts] = useState([]);
@@ -14,11 +14,25 @@ function HomePage() {
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
-        const res = await fetch("https://dummyjson.com/products?limit=9");
-        if (!res.ok) throw new Error("No se pudieron cargar los productos");
-        const data = await res.json();
-        
-        const adaptedProducts = data.products.map((item) => ({
+
+        // Repaso JS: Promise.all ejecuta dos peticiones a la vez en paralelo
+        const [laptopsRes, phonesRes] = await Promise.all([
+          fetch("https://dummyjson.com/products/category/laptops"),
+          fetch("https://dummyjson.com/products/category/smartphones"),
+        ]);
+
+        if (!laptopsRes.ok || !phonesRes.ok) {
+          throw new Error("No se pudieron cargar los productos de tecnología");
+        }
+
+        const laptopsData = await laptopsRes.json();
+        const phonesData = await phonesRes.json();
+
+        // Unimos los dos arrays con el operador Spread (...)
+        const techProducts = [...laptopsData.products, ...phonesData.products];
+
+        // Los adaptamos a nuestro formato
+        const adaptedProducts = techProducts.map((item) => ({
           id: item.id,
           title: item.title,
           price: item.price,
@@ -40,8 +54,11 @@ function HomePage() {
 
   const categories = ["Todas", ...new Set(products.map((p) => p.category))];
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "Todas" || product.category === selectedCategory;
+    const matchesSearch = product.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "Todas" || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -51,7 +68,11 @@ function HomePage() {
 
       {isLoading ? (
         <div className="text-center py-5 my-5">
-          <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
+          <div
+            className="spinner-border text-primary"
+            role="status"
+            style={{ width: "3rem", height: "3rem" }}
+          >
             <span className="visually-hidden">Cargando...</span>
           </div>
           <p className="mt-3 text-muted">Cargando catálogo desde la API...</p>
@@ -82,10 +103,7 @@ function HomePage() {
           ) : (
             <div className="row">
               {filteredProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                />
+                <ProductCard key={product.id} product={product} />
               ))}
             </div>
           )}
